@@ -10,6 +10,7 @@ members = [
     "aggregator",
     "omnichain-mirror",
     "disclosure",
+    "asp",
 ]
 
 [workspace.package]

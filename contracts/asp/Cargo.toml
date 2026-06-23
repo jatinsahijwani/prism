@@ -1,6 +1,6 @@
 [package]
-name = "prism-stellar-disclosure"
-description = "Prism — view keys + ASP, SEP-57 selective disclosure"
+name = "prism-stellar-asp"
+description = "Prism — association-set provider (ASP): allow/deny set + approved roots"
 version = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
@@ -15,6 +15,7 @@ doctest = false
 soroban-sdk = { workspace = true }
 
 [dev-dependencies]
-# verifier-registry registered into the test env; driven via the local VerifierClient.
 soroban-sdk = { workspace = true, features = ["testutils"] }
-prism-stellar-verifier-registry = { path = "../verifier-registry", features = ["testutils"] }
+
+[features]
+testutils = ["soroban-sdk/testutils"]

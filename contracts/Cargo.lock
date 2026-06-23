@@ -1067,6 +1067,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "prism-stellar-asp"
+version = "0.1.0"
+dependencies = [
+ "soroban-sdk",
+]
+
+[[package]]
 name = "prism-stellar-commitment-tree"
 version = "0.1.0"
 dependencies = [
@@ -1078,6 +1085,7 @@ dependencies = [
 name = "prism-stellar-disclosure"
 version = "0.1.0"
 dependencies = [
+ "prism-stellar-verifier-registry",
  "soroban-sdk",
 ]
 
