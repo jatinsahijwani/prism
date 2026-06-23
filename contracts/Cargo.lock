@@ -1101,6 +1101,7 @@ dependencies = [
 name = "prism-stellar-omnichain-mirror"
 version = "0.1.0"
 dependencies = [
+ "prism-stellar-poseidon",
  "soroban-sdk",
 ]
 
