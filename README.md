@@ -33,28 +33,50 @@ bench/       # instruction-count + XLM cost benchmarks (the "receipts")
 ## Benchmarks — receipts
 
 The load-bearing constraint is Soroban's **~100M instruction ceiling per contract call**.
-A single Groth16/BN254 verify ≈ 40M; naive N-verify blows past 100M fast; the Aggregator's
-job is N→1 (one ~40M verify regardless of N).
+A single Groth16/BN254 verify measures **~28.8M instructions on testnet** (Protocol 26);
+naive N-verify blows past 100M at **N = 4**; the Aggregator's job is N→1 (one ~28.8M
+verify regardless of N).
 
-| Scenario | Instructions | Fits in one tx? | XLM cost |
+| Scenario | Instructions | Fits in one tx? | Resource fee |
 |---|---|---|---|
-| Single Groth16/BN254 verify | _TBD (Step 4)_ | — | _TBD_ |
-| Naive N-verify (N at which it fails) | _TBD_ | ❌ | — |
-| Prism aggregated N→1 | _TBD_ | ✅ | _TBD_ |
+| Single Groth16/BN254 verify (4 public inputs) | **28,822,880** (testnet sim) | ✅ | ~38,819 stroops (~0.0039 XLM) |
+| Naive 3-verify | ~86.5M | ✅ | — |
+| Naive 4-verify | ~115.3M | ❌ **exceeds ceiling** | — |
+| Prism aggregated N→1 | ~28.8M (target) | ✅ | _Aggregator — next milestone_ |
+
+_Single-verify is measured on Stellar testnet via RPC `simulateTransaction` (decoded
+`SorobanTransactionData.resources.instructions`); the native `cargo test` bench reports
+26,953,076 (Rust-native counts underestimate WASM). The N=4 cliff is derived from the
+single-verify cost. The aggregated row is the Aggregator milestone's target, not yet
+measured._
+
+## Deployment (Stellar testnet, Protocol 26)
+
+| Item | Value |
+|---|---|
+| Contract (verifier-registry) | `CBSUNYX74ZJYRAIEB5WQN4QBDMDXKO7NKVDGLYNZCHC2PZ5N4STX4DBF` |
+| Deploy tx | `b79bfd9c2aba99dea98c7c0df888266fc57e03ae617517c1ce5b18598bb7f446` |
+| On-chain verify tx (returns `true`) | `ae7324c24032f1653a19cad355bef423960277e69abbdf872acd2faea8ac6fac` |
+| Deployer | `GBOHXV4AO7QHS4MMVERDLEVVMPSFE6S5E5SBWDFE3SVW3ZLTUBWMQNSA` |
+
+Reproduce: `circuits/` → `pnpm install && bash scripts/build.sh && node scripts/export_fixtures_rs.mjs`;
+`contracts/` → `cargo test -p prism-stellar-verifier-registry -- --nocapture`.
 
 ## Real vs. mocked
 
 | Component | Status |
 |---|---|
-| verifier-registry (Groth16/BN254) | _building_ |
-| Everything else | _scaffold stubs_ |
+| verifier-registry (Groth16/BN254) | **REAL** — deployed + verifying on testnet |
+| membership circuit + trusted setup | **REAL** — Circom 2, Hermez 2^14 ptau, snarkjs |
+| commitment-tree / nullifier-registry / aggregator / omnichain-mirror / disclosure | scaffold stubs (`ping`) |
+| SDK / demo | scaffold stubs |
 
 _Updated as milestones land. Honesty over polish — mocks are labeled._
 
 ## Status
 
 - [x] Repo scaffolded
-- [ ] Day-1 spike: Groth16/BN254 verify on testnet, instruction count < 100M
+- [x] Day-1 spike: Groth16/BN254 verify on testnet, instruction count < 100M (28.8M)
 - [ ] CommitmentTree + NullifierRegistry
 - [ ] Aggregator K→1 working + benchmarked
 - [ ] Omnichain mirror (attestation)
