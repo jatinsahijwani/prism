@@ -69,6 +69,11 @@ pub trait NullifierInterface {
     fn batch_insert(env: Env, nullifiers: Vec<BytesN<32>>) -> u32;
 }
 
+#[contractclient(name = "AspClient")]
+pub trait AspInterface {
+    fn is_approved_root(env: Env, root: BytesN<32>) -> bool;
+}
+
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(u32)]
@@ -80,6 +85,7 @@ pub enum Error {
     InvalidProof = 5,
     NullifierAlreadySpent = 6,
     EmptyBatch = 7,
+    RootNotApproved = 8,
 }
 
 #[contracttype]
@@ -88,6 +94,7 @@ pub struct Config {
     pub verifier: Address,
     pub tree: Address,
     pub nullifiers: Address,
+    pub asp: Address,
     pub circuit_id: BytesN<32>,
 }
 
@@ -116,6 +123,7 @@ impl Aggregator {
         verifier: Address,
         tree: Address,
         nullifiers: Address,
+        asp: Address,
         circuit_id: BytesN<32>,
     ) -> Result<(), Error> {
         let s = env.storage().instance();
@@ -128,6 +136,7 @@ impl Aggregator {
                 verifier,
                 tree,
                 nullifiers,
+                asp,
                 circuit_id,
             },
         );
@@ -164,6 +173,13 @@ impl Aggregator {
         let tree = TreeClient::new(&env, &cfg.tree);
         if !tree.is_known_root(&root) {
             return Err(Error::UnknownRoot);
+        }
+
+        // 1b. ASP gate: the root must be one the association-set provider has approved
+        // (compliance attestation that the set contains only allowed participants).
+        let asp = AspClient::new(&env, &cfg.asp);
+        if !asp.is_approved_root(&root) {
+            return Err(Error::RootNotApproved);
         }
 
         // 2. Bind calldata (nullifiers, aggregate_output) to the proof via H.

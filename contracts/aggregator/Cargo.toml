@@ -23,3 +23,4 @@ soroban-sdk = { workspace = true, features = ["testutils"] }
 prism-stellar-verifier-registry = { path = "../verifier-registry", features = ["testutils"] }
 prism-stellar-commitment-tree = { path = "../commitment-tree", features = ["testutils"] }
 prism-stellar-nullifier-registry = { path = "../nullifier-registry", features = ["testutils"] }
+prism-stellar-asp = { path = "../asp", features = ["testutils"] }

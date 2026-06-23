@@ -4,6 +4,7 @@ use crate::{
     VerifyingKey,
 };
 // Real contracts (dev-dep) registered into the test env; driven via the local clients.
+use prism_stellar_asp::{Asp, AspClient as AspContractClient};
 use prism_stellar_commitment_tree::CommitmentTree;
 use prism_stellar_nullifier_registry::NullifierRegistry;
 use prism_stellar_verifier_registry::VerifierRegistry;
@@ -53,15 +54,17 @@ struct World {
     env: Env,
     agg_id: Address,
     nr_id: Address,
+    asp_id: Address,
 }
 
-/// Register the four contracts, build the tree from the K=8 commitments, register the
-/// aggregation VK, and wire the aggregator. Returns owned addresses + the env.
+/// Register the contracts, build the tree from the K=8 commitments, register the
+/// aggregation VK, approve the root in the ASP, and wire the aggregator.
 fn world() -> World {
     let env = Env::default();
     let verifier_id = env.register(VerifierRegistry, ());
     let tree_id = env.register(CommitmentTree, ());
     let nr_id = env.register(NullifierRegistry, ());
+    let asp_id = env.register(Asp, ());
     let agg_id = env.register(Aggregator, ());
 
     let v = VerifierClient::new(&env, &verifier_id);
@@ -82,11 +85,15 @@ fn world() -> World {
         "on-chain tree root must equal the circuit's root"
     );
 
-    agg.init(&verifier_id, &tree_id, &nr_id, &circuit_id);
+    // ASP approves the (compliant) root so settlement against it is permitted.
+    AspContractClient::new(&env, &asp_id).approve_root(&b32(&env, &k8::ROOT));
+
+    agg.init(&verifier_id, &tree_id, &nr_id, &asp_id, &circuit_id);
     World {
         env,
         agg_id,
         nr_id,
+        asp_id,
     }
 }
 
@@ -152,6 +159,24 @@ fn tampered_proof_rejected() {
         &nullifiers(env),
     );
     assert_eq!(res, Err(Ok(Error::InvalidProof)));
+}
+
+#[test]
+fn unapproved_root_rejected_by_asp() {
+    let w = world();
+    let env = &w.env;
+    let agg = AggregatorClient::new(env, &w.agg_id);
+    // Revoke ASP approval: the root is still a known tree root, but no longer compliant.
+    AspContractClient::new(env, &w.asp_id).revoke_root(&b32(env, &k8::ROOT));
+    let res = agg.try_settle(
+        &proof(env),
+        &b32(env, &k8::ROOT),
+        &b32(env, &k8::EXT_NULL),
+        &b32(env, &k8::H),
+        &b32(env, &k8::AGG_OUTPUT),
+        &nullifiers(env),
+    );
+    assert_eq!(res, Err(Ok(Error::RootNotApproved)));
 }
 
 #[test]
