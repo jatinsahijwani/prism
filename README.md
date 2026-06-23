@@ -60,34 +60,53 @@ deferred to SCF.**_
 
 ## Deployment (Stellar testnet, Protocol 26)
 
-| Item | Value |
+The **Aggregator milestone** — one on-chain Groth16/BN254 verify settled **K=8** memberships
+in a single transaction (`Settled count: 8`):
+
+| Contract | Address |
 |---|---|
-| Contract (verifier-registry) | `CBSUNYX74ZJYRAIEB5WQN4QBDMDXKO7NKVDGLYNZCHC2PZ5N4STX4DBF` |
-| Deploy tx | `b79bfd9c2aba99dea98c7c0df888266fc57e03ae617517c1ce5b18598bb7f446` |
-| On-chain verify tx (returns `true`) | `ae7324c24032f1653a19cad355bef423960277e69abbdf872acd2faea8ac6fac` |
+| aggregator | `CCTYJUKHHCYHI6MT4EQLCL7P5UQTSVZWT6NJAZ7TSLHIN6QYGYACA76C` |
+| verifier-registry | `CDT4FU2JVI2JWBKMBHVQSEYTG7L7DXXU2NRHVKDQFC2XFHRFMS6Z7PQ2` |
+| commitment-tree | `CAUMBMTTWILMQTYL2LY3QEWWAE6C7GBPHVU4BJT44M4U56XNLMBLE7X6` |
+| nullifier-registry | `CDXWKWSSAVXNU3R67T5VYSJDKQBWA6JTCFHMQBDSA52KCJ7PRQMP64UL` |
+
+| Receipt | Value |
+|---|---|
+| K=8 aggregated settle tx | `bfeec9d01ab59f93b6f67a27d9db42dc0ca2655a0027d74f56464d7a0abe80cf` |
+| Settle instructions (testnet sim) | **42,084,162** (1 verify + 8-deep H-fold + 8 nullifier writes) |
+| Return value | `8` (memberships settled) · all 8 nullifiers now `is_spent` |
+| On-chain tree root | `02eda5…467a0d` — **equals the circuit's root** (no mock) |
 | Deployer | `GBOHXV4AO7QHS4MMVERDLEVVMPSFE6S5E5SBWDFE3SVW3ZLTUBWMQNSA` |
 
-Reproduce: `circuits/` → `pnpm install && bash scripts/build.sh && node scripts/export_fixtures_rs.mjs`;
-`contracts/` → `cargo test -p prism-stellar-verifier-registry -- --nocapture`.
+Day-1 single-verify contract `CBSUNYX74ZJYRAIEB5WQN4QBDMDXKO7NKVDGLYNZCHC2PZ5N4STX4DBF`
+(verify tx `ae7324c2…ac6fac`) remains live.
+
+Reproduce: `circuits/` → `pnpm install && bash scripts/aggregate_build.sh && node scripts/export_agg_fixtures_rs.mjs`;
+`contracts/` → `cargo test -- --nocapture` (incl. `verify_cost_is_flat_in_k`).
 
 ## Real vs. mocked
 
 | Component | Status |
 |---|---|
 | verifier-registry (Groth16/BN254) | **REAL** — deployed + verifying on testnet |
-| membership circuit + trusted setup | **REAL** — Circom 2, Hermez 2^14 ptau, snarkjs |
-| commitment-tree / nullifier-registry / aggregator / omnichain-mirror / disclosure | scaffold stubs (`ping`) |
+| commitment-tree (incremental Merkle, Poseidon) | **REAL** — deployed; on-chain root == circuit root |
+| nullifier-registry (atomic + all-or-nothing batch) | **REAL** — deployed on testnet |
+| aggregator (K→1) | **REAL** — K=8 settled on testnet in one verify |
+| poseidon (circomlib-compatible, BN254) | **REAL** — matches circomlib test vector |
+| membership + aggregation circuits + trusted setup | **REAL** — Circom 2, Hermez ptau (2^14 / 2^17), snarkjs |
+| omnichain-mirror / disclosure | scaffold stubs (`ping`) |
 | SDK / demo | scaffold stubs |
 
-_Updated as milestones land. Honesty over polish — mocks are labeled._
+_Updated as milestones land. Honesty over polish — mocks are labeled. Inserts on the tree /
+nullifier registry are permissionless this milestone (operator-gating is a hardening TODO)._
 
 ## Status
 
 - [x] Repo scaffolded
 - [x] Day-1 spike: Groth16/BN254 verify on testnet, instruction count < 100M (28.8M)
-- [ ] CommitmentTree + NullifierRegistry
-- [ ] Aggregator K→1 working + benchmarked
+- [x] CommitmentTree + NullifierRegistry (deployed; tree root matches circuit)
+- [x] Aggregator K→1 working + benchmarked (flat ~26.6M verify; K=8 settled on testnet)
 - [ ] Omnichain mirror (attestation)
 - [ ] Disclosure (view key + ASP stub)
 - [ ] SDK + demo dapp
-- [ ] README benchmark table + demo video
+- [ ] Demo video
