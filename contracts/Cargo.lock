@@ -1091,6 +1091,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "prism-stellar-poseidon"
+version = "0.1.0"
+dependencies = [
+ "soroban-sdk",
+]
+
+[[package]]
 name = "prism-stellar-verifier-registry"
 version = "0.1.0"
 dependencies = [

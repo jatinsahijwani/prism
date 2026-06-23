@@ -1,0 +1,18 @@
+[package]
+name = "prism-stellar-poseidon"
+description = "Prism — circomlib-compatible Poseidon (BN254, t=3) via Soroban CAP-0075 host functions"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+rust-version = { workspace = true }
+
+[lib]
+doctest = false
+
+[dependencies]
+# hazmat-crypto exposes the low-level CAP-0075 poseidon_permutation host fn.
+soroban-sdk = { workspace = true, features = ["hazmat-crypto"] }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils", "hazmat-crypto"] }

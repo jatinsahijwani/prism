@@ -3,6 +3,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "poseidon",
     "verifier-registry",
     "commitment-tree",
     "nullifier-registry",
