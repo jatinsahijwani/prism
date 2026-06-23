@@ -9,6 +9,7 @@ scratchpad/
 target/
 **/*.rs.bk
 *.wasm
+test_snapshots/
 
 # --- Node / JS ---
 node_modules/
