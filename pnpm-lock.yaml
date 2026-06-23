@@ -22,7 +22,14 @@ importers:
         specifier: ^0.7.6
         version: 0.7.6
 
-  packages/sdk: {}
+  packages/sdk:
+    dependencies:
+      circomlibjs:
+        specifier: ^0.1.7
+        version: 0.1.7
+      snarkjs:
+        specifier: ^0.7.6
+        version: 0.7.6
 
 packages:
 

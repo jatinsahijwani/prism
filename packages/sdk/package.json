@@ -1,11 +1,16 @@
 {
   "name": "@prism-stellar/sdk",
   "version": "0.1.0",
-  "description": "Prism TypeScript SDK — client-side WASM proving + Soroban tx builders",
+  "description": "Prism TypeScript SDK — client-side proving + Soroban tx builders + selective disclosure",
   "license": "Apache-2.0",
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "build": "echo \"(stub) sdk build\""
+    "build": "echo \"(stub) sdk build\"",
+    "demo:auditor": "node src/auditor-demo.ts"
+  },
+  "dependencies": {
+    "circomlibjs": "^0.1.7",
+    "snarkjs": "^0.7.6"
   }
 }
