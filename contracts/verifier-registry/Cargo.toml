@@ -1,0 +1,18 @@
+[package]
+name = "prism-stellar-verifier-registry"
+description = "Prism — Groth16/BN254 verifier registry (IVerifier trait + circuitId->VK) for Soroban"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+rust-version = { workspace = true }
+
+[lib]
+crate-type = ["lib", "cdylib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }

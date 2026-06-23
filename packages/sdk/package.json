@@ -1,0 +1,11 @@
+{
+  "name": "@prism-stellar/sdk",
+  "version": "0.1.0",
+  "description": "Prism TypeScript SDK — client-side WASM proving + Soroban tx builders",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "echo \"(stub) sdk build\""
+  }
+}

@@ -1,0 +1,36 @@
+# --- Claude Code context (CLAUDE.md mandate: never commit these) ---
+CLAUDE.md
+.claude/
+AGENTS.md
+.scratch/
+scratchpad/
+
+# --- Rust / Soroban ---
+target/
+**/*.rs.bk
+*.wasm
+
+# --- Node / JS ---
+node_modules/
+dist/
+.pnpm-store/
+*.tsbuildinfo
+
+# --- Circuits: trusted-setup + build artifacts (keep fixtures, not these) ---
+*.ptau
+*.zkey
+*.r1cs
+*.sym
+*_js/
+*.wtns
+circuits/build/
+
+# --- Secrets / keys (never commit) ---
+.env
+.env.*
+*.pem
+.stellar/
+.soroban/
+
+# --- OS ---
+.DS_Store
