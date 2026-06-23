@@ -92,6 +92,25 @@ The **Disclosure milestone** — settle privately, prove specifics to an auditor
 | What the chain shows | only `(R, ciphertext)` per note — **no amounts** |
 | What the auditor sees | decrypts on-chain ciphertexts → `[4.2M, 1.75M, 3.05M]`, predicate `total == 9,000,000` **PASS** |
 
+The **Omnichain milestone** — a nullifier spent on EVM is rejected on Stellar:
+
+| Contract (fresh stack) | Address |
+|---|---|
+| omnichain-mirror | `CBWF6BC2JULCVNE3SLRAIVJWASCSQPIGQOF6BYRKTPUQSDEESAPWLSSI` |
+| aggregator (mirror-wired) | `CARP3XNCYQPRPETRJUKE7D5NLDXDNYTL2CK7RAMTI32NXS2YOULTPO6C` |
+
+| Step | Result |
+|---|---|
+| Relayer syncs EVM-spent nullifier → mirror (sync tx) | `ba047b1570e8688c8beffcf698e8a7346c21d65b631d908846ca772cf6b17d70` |
+| Settle identity **A** (spent on EVM) | **BLOCKED** — `Error(Contract, #9) ForeignSpent`; A *not* spent on Stellar |
+| Settle identity **B** (fresh) | **SUCCESS** — `Settled count: 1`, tx `2be458808641f8c56ac98ea53d7aa8adc01736828e0d03c3e37cdf4fa1ce6daa` |
+
+**Why it matters, two ways:** (1) **cross-chain Sybil resistance** — the same identity can't
+double-claim across EVM and Stellar; (2) a **bridge that brings EVM ZK developers** (and their
+BN254 circuits) onto Stellar unchanged. **Trust (this milestone):** the relayer is TRUSTED
+(attestation mode); the EVM source is a labeled mock. **SCF:** replace the relayer with on-chain
+verification of a succinct proof of EVM state against the mirror's `foreign_root` (BN254/EVM parity).
+
 Day-1 single-verify contract `CBSUNYX74ZJYRAIEB5WQN4QBDMDXKO7NKVDGLYNZCHC2PZ5N4STX4DBF`
 (verify tx `ae7324c2…ac6fac`) remains live.
 
@@ -125,7 +144,8 @@ proofs and full SEP-57 wire-format binding are SCF items.
 | disclosure (encrypted note + on-chain correctness proof) | **REAL** — deployed; 3 notes stored on testnet, auditor decrypts |
 | asp (allow/deny + approved roots) | **REAL** — deployed; gates `settle()` |
 | SDK selective disclosure (`encryptNote`, `prism.disclose`) | **REAL** — Baby Jubjub ECDH + Poseidon; auditor demo runs |
-| omnichain-mirror | scaffold stub (`ping`) |
+| omnichain-mirror + settle foreign-spent gate | **REAL** — deployed; EVM-spent identity blocked on testnet |
+| relayer: Stellar posting | **REAL** (stellar-cli) — EVM source is a labeled **MOCK** |
 | demo dapp (UI) | not started |
 
 _Updated as milestones land. Honesty over polish — mocks are labeled. Tree/nullifier/ASP
@@ -141,6 +161,6 @@ bound in-circuit._
 - [x] Aggregator K→1 working + benchmarked (flat ~26.6M verify; K=8 settled on testnet)
 - [x] Disclosure (viewing key + ASP + on-chain correctness proof; deployed on testnet)
 - [x] SDK selective disclosure (`encryptNote` + `prism.disclose`) + auditor demo
-- [ ] Omnichain mirror (attestation)
+- [x] Omnichain mirror (attestation; EVM-spent identity blocked on testnet, fresh settles)
 - [ ] Demo dapp (UI)
 - [ ] Demo video
