@@ -78,11 +78,39 @@ in a single transaction (`Settled count: 8`):
 | On-chain tree root | `02eda5…467a0d` — **equals the circuit's root** (no mock) |
 | Deployer | `GBOHXV4AO7QHS4MMVERDLEVVMPSFE6S5E5SBWDFE3SVW3ZLTUBWMQNSA` |
 
+The **Disclosure milestone** — settle privately, prove specifics to an auditor:
+
+| Contract | Address |
+|---|---|
+| disclosure | `CBBUNBBZAQBQUNVCZTGD4KUJCRO5T6Z24P3H3IAUHHPL6CBNGRINCAHU` |
+| asp (association-set provider) | `CAIK3JUGJ5QEGNHAKWC7CEJGXDB53DPYMQW5GLB4Q3UEO3UJPLTUUS2C` |
+
+| Receipt | Value |
+|---|---|
+| `put_note` txs (proof verified on-chain) | `24e038a5…562b`, `597f1e60…bf1b`, `dd3e6263…aa83` |
+| `put_note` instructions (testnet sim) | **30,320,716** (one disclosure-correctness verify + store) |
+| What the chain shows | only `(R, ciphertext)` per note — **no amounts** |
+| What the auditor sees | decrypts on-chain ciphertexts → `[4.2M, 1.75M, 3.05M]`, predicate `total == 9,000,000` **PASS** |
+
 Day-1 single-verify contract `CBSUNYX74ZJYRAIEB5WQN4QBDMDXKO7NKVDGLYNZCHC2PZ5N4STX4DBF`
 (verify tx `ae7324c2…ac6fac`) remains live.
 
-Reproduce: `circuits/` → `pnpm install && bash scripts/aggregate_build.sh && node scripts/export_agg_fixtures_rs.mjs`;
-`contracts/` → `cargo test -- --nocapture` (incl. `verify_cost_is_flat_in_k`).
+Reproduce: `circuits/` → `pnpm install && bash scripts/aggregate_build.sh && bash scripts/disclosure_build.sh && node scripts/export_agg_fixtures_rs.mjs`;
+`contracts/` → `cargo test -- --nocapture`; SDK demo → `cd packages/sdk && node src/auditor-demo.ts`.
+
+## Selective disclosure → SEP-57 / confidential-token mapping
+
+Prism is the **ZK confidential+disclosure module a regulated-asset issuer plugs in** — not a
+generic view key. Mapping to the SEP-57 / ERC-7984-style confidential-token interface:
+
+- **Issuer onboarding** = register the auditor/regulator's **viewing key** (`disclosure.register_auditor`) and admit participants via the **ASP** (`asp.set_allowed`, then `asp.approve_root`).
+- **Confidential settlement** = the Aggregator settles K transfers under one proof; `settle()` enforces `asp.is_approved_root` (compliance gate) — amounts never hit the chain.
+- **Selective disclosure** = each note's amount is encrypted to the auditor key (Baby Jubjub ECDH + Poseidon); `disclosure.put_note` accepts it **only with a disclosure-correctness proof** binding the ciphertext to the committed amount, so the auditor's later decryption is trustworthy. The regulator runs `prism.disclose(viewKey, predicate)` for `total == X` / `all ≤ cap` — predicate disclosure, not full de-shielding.
+
+**Scope this milestone:** the **amount** is bound in-circuit (the soundness-critical field);
+counterparty/memo are encrypted SDK-side but not yet bound in-circuit. Auditor decryption +
+predicate checks run off-chain (the standard view-key model). Folding/aggregation of disclosure
+proofs and full SEP-57 wire-format binding are SCF items.
 
 ## Real vs. mocked
 
@@ -93,12 +121,17 @@ Reproduce: `circuits/` → `pnpm install && bash scripts/aggregate_build.sh && n
 | nullifier-registry (atomic + all-or-nothing batch) | **REAL** — deployed on testnet |
 | aggregator (K→1) | **REAL** — K=8 settled on testnet in one verify |
 | poseidon (circomlib-compatible, BN254) | **REAL** — matches circomlib test vector |
-| membership + aggregation circuits + trusted setup | **REAL** — Circom 2, Hermez ptau (2^14 / 2^17), snarkjs |
-| omnichain-mirror / disclosure | scaffold stubs (`ping`) |
-| SDK / demo | scaffold stubs |
+| membership + aggregation + disclosure circuits + trusted setup | **REAL** — Circom 2, Hermez ptau, snarkjs |
+| disclosure (encrypted note + on-chain correctness proof) | **REAL** — deployed; 3 notes stored on testnet, auditor decrypts |
+| asp (allow/deny + approved roots) | **REAL** — deployed; gates `settle()` |
+| SDK selective disclosure (`encryptNote`, `prism.disclose`) | **REAL** — Baby Jubjub ECDH + Poseidon; auditor demo runs |
+| omnichain-mirror | scaffold stub (`ping`) |
+| demo dapp (UI) | not started |
 
-_Updated as milestones land. Honesty over polish — mocks are labeled. Inserts on the tree /
-nullifier registry are permissionless this milestone (operator-gating is a hardening TODO)._
+_Updated as milestones land. Honesty over polish — mocks are labeled. Tree/nullifier/ASP
+mutations are permissionless this milestone (operator-gating is a hardening TODO). Auditor
+decryption + predicate checks are off-chain (view-key model); counterparty/memo not yet
+bound in-circuit._
 
 ## Status
 
@@ -106,7 +139,8 @@ nullifier registry are permissionless this milestone (operator-gating is a harde
 - [x] Day-1 spike: Groth16/BN254 verify on testnet, instruction count < 100M (28.8M)
 - [x] CommitmentTree + NullifierRegistry (deployed; tree root matches circuit)
 - [x] Aggregator K→1 working + benchmarked (flat ~26.6M verify; K=8 settled on testnet)
+- [x] Disclosure (viewing key + ASP + on-chain correctness proof; deployed on testnet)
+- [x] SDK selective disclosure (`encryptNote` + `prism.disclose`) + auditor demo
 - [ ] Omnichain mirror (attestation)
-- [ ] Disclosure (view key + ASP stub)
-- [ ] SDK + demo dapp
+- [ ] Demo dapp (UI)
 - [ ] Demo video
