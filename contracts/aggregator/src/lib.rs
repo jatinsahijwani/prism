@@ -202,6 +202,10 @@ impl Aggregator {
 }
 
 #[cfg(test)]
+extern crate std;
+#[cfg(test)]
 mod test;
+#[cfg(test)]
+mod bench;
 #[cfg(test)]
 mod agg_fixtures;

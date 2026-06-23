@@ -37,18 +37,26 @@ A single Groth16/BN254 verify measures **~28.8M instructions on testnet** (Proto
 naive N-verify blows past 100M at **N = 4**; the Aggregator's job is N→1 (one ~28.8M
 verify regardless of N).
 
-| Scenario | Instructions | Fits in one tx? | Resource fee |
-|---|---|---|---|
-| Single Groth16/BN254 verify (4 public inputs) | **28,822,880** (testnet sim) | ✅ | ~38,819 stroops (~0.0039 XLM) |
-| Naive 3-verify | ~86.5M | ✅ | — |
-| Naive 4-verify | ~115.3M | ❌ **exceeds ceiling** | — |
-| Prism aggregated N→1 | ~28.8M (target) | ✅ | _Aggregator — next milestone_ |
+**Aggregator — one verify settles K memberships, flat in K.** Because the aggregation
+circuit exposes a *constant* 3 public signals `[H, root, externalNullifier]` regardless of
+K, the on-chain verify cost is flat while naive per-proof verification is K× and breaks the
+ceiling at **K=4**:
 
-_Single-verify is measured on Stellar testnet via RPC `simulateTransaction` (decoded
-`SorobanTransactionData.resources.instructions`); the native `cargo test` bench reports
-26,953,076 (Rust-native counts underestimate WASM). The N=4 cliff is derived from the
-single-verify cost. The aggregated row is the Aggregator milestone's target, not yet
-measured._
+| K | Prism: 1 verify (CPU insns) | Naive: K verifies | Naive fits <100M? |
+|---|---|---|---|
+| 1 | 26,619,054 | 26,619,054 | ✅ |
+| 2 | 26,619,054 | 53,238,108 | ✅ |
+| 4 | 26,619,054 | 106,476,216 | ❌ **exceeds ceiling** |
+| 8 | 26,619,054 | 212,952,432 | ✅ Prism / ❌ naive |
+
+Single Groth16/BN254 verify also measured on testnet via RPC `simulateTransaction`
+(decoded `SorobanTransactionData.resources.instructions`) at **28,822,880** instructions,
+~38,819 stroops (~0.0039 XLM).
+
+_Native `cargo test` CPU counts (above) underestimate WASM; testnet simulation is the
+authoritative figure. The K-table is from the `verify_cost_is_flat_in_k` bench — spread
+across K is **zero**. **Aggregation-by-batching; recursive folding (Nova/ProtoStar) is
+deferred to SCF.**_
 
 ## Deployment (Stellar testnet, Protocol 26)
 
