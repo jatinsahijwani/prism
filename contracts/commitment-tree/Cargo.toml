@@ -17,3 +17,6 @@ prism-stellar-poseidon = { path = "../poseidon" }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
+
+[features]
+testutils = ["soroban-sdk/testutils"]

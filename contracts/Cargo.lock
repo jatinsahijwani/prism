@@ -1059,6 +1059,10 @@ dependencies = [
 name = "prism-stellar-aggregator"
 version = "0.1.0"
 dependencies = [
+ "prism-stellar-commitment-tree",
+ "prism-stellar-nullifier-registry",
+ "prism-stellar-poseidon",
+ "prism-stellar-verifier-registry",
  "soroban-sdk",
 ]
 

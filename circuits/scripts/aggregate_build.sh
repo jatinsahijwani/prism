@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."   # circuits/
 mkdir -p build fixtures
-KS=(2 4 8)
+KS=(1 2 4 8)
 
 MAX=0
 for K in "${KS[@]}"; do

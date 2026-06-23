@@ -12,7 +12,14 @@ crate-type = ["lib", "cdylib"]
 doctest = false
 
 [dependencies]
+# Only the plain Poseidon lib (no contract exports) is linked into the wasm.
+# Cross-contract callees are reached via local #[contractclient] traits (see lib.rs),
+# so their wasm exports are NOT linked into this contract.
 soroban-sdk = { workspace = true }
+prism-stellar-poseidon = { path = "../poseidon" }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
+prism-stellar-verifier-registry = { path = "../verifier-registry", features = ["testutils"] }
+prism-stellar-commitment-tree = { path = "../commitment-tree", features = ["testutils"] }
+prism-stellar-nullifier-registry = { path = "../nullifier-registry", features = ["testutils"] }
