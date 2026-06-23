@@ -1,6 +1,6 @@
 [package]
 name = "prism-stellar-commitment-tree"
-description = "Prism — append-only incremental Merkle tree (Poseidon2 host fn)"
+description = "Prism — append-only incremental Merkle tree (circomlib Poseidon, BN254)"
 version = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
@@ -13,6 +13,7 @@ doctest = false
 
 [dependencies]
 soroban-sdk = { workspace = true }
+prism-stellar-poseidon = { path = "../poseidon" }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }

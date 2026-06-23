@@ -11,7 +11,7 @@
 //! Only t=3 is needed on-chain: Merkle node hashing, commitments, nullifiers, and the
 //! aggregator's H-fold are all 2-input.
 
-use soroban_sdk::{crypto::bn254::Bn254Fr, Bytes, Env, Symbol, U256, Vec};
+use soroban_sdk::{crypto::bn254::Bn254Fr, Bytes, BytesN, Env, Symbol, U256, Vec};
 
 mod constants_t3;
 use constants_t3::{D, MDS, RC, ROUNDS_F, ROUNDS_P, T};
@@ -69,6 +69,17 @@ impl Poseidon {
             &self.rc,
         );
         out.get(0).unwrap()
+    }
+
+    /// Poseidon hash of two 32-byte big-endian field elements -> 32-byte big-endian.
+    /// Convenience for Merkle nodes / nullifier folds stored as `BytesN<32>`.
+    pub fn hash2_bytes(&self, a: &BytesN<32>, b: &BytesN<32>) -> BytesN<32> {
+        let av = U256::from_be_bytes(&self.env, &Bytes::from_array(&self.env, &a.to_array()));
+        let bv = U256::from_be_bytes(&self.env, &Bytes::from_array(&self.env, &b.to_array()));
+        let h = self.hash2(&av, &bv);
+        let mut arr = [0u8; 32];
+        h.to_be_bytes().copy_into_slice(&mut arr);
+        BytesN::from_array(&self.env, &arr)
     }
 
     /// Reduce a U256 into the BN254 scalar field (canonical leaf/nullifier domain).
