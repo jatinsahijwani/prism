@@ -74,6 +74,11 @@ pub trait AspInterface {
     fn is_approved_root(env: Env, root: BytesN<32>) -> bool;
 }
 
+#[contractclient(name = "MirrorClient")]
+pub trait MirrorInterface {
+    fn is_foreign_spent(env: Env, nullifier: BytesN<32>) -> bool;
+}
+
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(u32)]
@@ -86,6 +91,7 @@ pub enum Error {
     NullifierAlreadySpent = 6,
     EmptyBatch = 7,
     RootNotApproved = 8,
+    ForeignSpent = 9,
 }
 
 #[contracttype]
@@ -95,6 +101,7 @@ pub struct Config {
     pub tree: Address,
     pub nullifiers: Address,
     pub asp: Address,
+    pub mirror: Address,
     pub circuit_id: BytesN<32>,
 }
 
@@ -124,6 +131,7 @@ impl Aggregator {
         tree: Address,
         nullifiers: Address,
         asp: Address,
+        mirror: Address,
         circuit_id: BytesN<32>,
     ) -> Result<(), Error> {
         let s = env.storage().instance();
@@ -137,6 +145,7 @@ impl Aggregator {
                 tree,
                 nullifiers,
                 asp,
+                mirror,
                 circuit_id,
             },
         );
@@ -190,6 +199,15 @@ impl Aggregator {
         }
         if acc != h {
             return Err(Error::HBindingMismatch);
+        }
+
+        // 2b. Omnichain gate: reject the whole batch if ANY nullifier was already spent on
+        // the foreign (EVM) chain — cross-chain Sybil resistance. (All-or-nothing.)
+        let mirror = MirrorClient::new(&env, &cfg.mirror);
+        for n in nullifiers.iter() {
+            if mirror.is_foreign_spent(&n) {
+                return Err(Error::ForeignSpent);
+            }
         }
 
         // 3. ONE Groth16/BN254 verify (public inputs == circuit order [H, root, extN]).

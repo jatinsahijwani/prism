@@ -1062,6 +1062,7 @@ dependencies = [
  "prism-stellar-asp",
  "prism-stellar-commitment-tree",
  "prism-stellar-nullifier-registry",
+ "prism-stellar-omnichain-mirror",
  "prism-stellar-poseidon",
  "prism-stellar-verifier-registry",
  "soroban-sdk",

@@ -24,3 +24,4 @@ prism-stellar-verifier-registry = { path = "../verifier-registry", features = ["
 prism-stellar-commitment-tree = { path = "../commitment-tree", features = ["testutils"] }
 prism-stellar-nullifier-registry = { path = "../nullifier-registry", features = ["testutils"] }
 prism-stellar-asp = { path = "../asp", features = ["testutils"] }
+prism-stellar-omnichain-mirror = { path = "../omnichain-mirror", features = ["testutils"] }

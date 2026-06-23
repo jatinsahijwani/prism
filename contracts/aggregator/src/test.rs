@@ -7,8 +7,9 @@ use crate::{
 use prism_stellar_asp::{Asp, AspClient as AspContractClient};
 use prism_stellar_commitment_tree::CommitmentTree;
 use prism_stellar_nullifier_registry::NullifierRegistry;
+use prism_stellar_omnichain_mirror::{OmnichainMirror, OmnichainMirrorClient};
 use prism_stellar_verifier_registry::VerifierRegistry;
-use soroban_sdk::{Address, BytesN, Env, Vec};
+use soroban_sdk::{testutils::Address as _, Address, BytesN, Env, Vec};
 
 fn b32(env: &Env, b: &[u8; 32]) -> BytesN<32> {
     BytesN::from_array(env, b)
@@ -55,6 +56,7 @@ struct World {
     agg_id: Address,
     nr_id: Address,
     asp_id: Address,
+    mirror_id: Address,
 }
 
 /// Register the contracts, build the tree from the K=8 commitments, register the
@@ -65,7 +67,12 @@ fn world() -> World {
     let tree_id = env.register(CommitmentTree, ());
     let nr_id = env.register(NullifierRegistry, ());
     let asp_id = env.register(Asp, ());
+    let mirror_id = env.register(OmnichainMirror, ());
     let agg_id = env.register(Aggregator, ());
+
+    // Mirror starts empty (no foreign-spent nullifiers); operator is an arbitrary address.
+    env.mock_all_auths();
+    OmnichainMirrorClient::new(&env, &mirror_id).init(&Address::generate(&env));
 
     let v = VerifierClient::new(&env, &verifier_id);
     let t = TreeClient::new(&env, &tree_id);
@@ -88,12 +95,13 @@ fn world() -> World {
     // ASP approves the (compliant) root so settlement against it is permitted.
     AspContractClient::new(&env, &asp_id).approve_root(&b32(&env, &k8::ROOT));
 
-    agg.init(&verifier_id, &tree_id, &nr_id, &asp_id, &circuit_id);
+    agg.init(&verifier_id, &tree_id, &nr_id, &asp_id, &mirror_id, &circuit_id);
     World {
         env,
         agg_id,
         nr_id,
         asp_id,
+        mirror_id,
     }
 }
 
@@ -159,6 +167,28 @@ fn tampered_proof_rejected() {
         &nullifiers(env),
     );
     assert_eq!(res, Err(Ok(Error::InvalidProof)));
+}
+
+#[test]
+fn foreign_spent_nullifier_reverts_whole_batch() {
+    let w = world();
+    let env = &w.env;
+    let agg = AggregatorClient::new(env, &w.agg_id);
+    let nr = NullifierClient::new(env, &w.nr_id);
+    // Relayer mirrors one of the batch's nullifiers as already spent on EVM.
+    OmnichainMirrorClient::new(env, &w.mirror_id).post_spent(&b32(env, &k8::NULLIFIERS[5]));
+
+    let res = agg.try_settle(
+        &proof(env),
+        &b32(env, &k8::ROOT),
+        &b32(env, &k8::EXT_NULL),
+        &b32(env, &k8::H),
+        &b32(env, &k8::AGG_OUTPUT),
+        &nullifiers(env),
+    );
+    assert_eq!(res, Err(Ok(Error::ForeignSpent)));
+    // All-or-nothing: no nullifier from the batch was inserted on Stellar.
+    assert!(!nr.is_spent(&b32(env, &k8::NULLIFIERS[0])));
 }
 
 #[test]
