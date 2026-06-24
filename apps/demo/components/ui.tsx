@@ -8,6 +8,7 @@ export const ACCENTS = {
   green: "#34d399",
   orange: "#fb923c",
   violet: "#8b5cf6",
+  red: "#f87171",
 } as const;
 
 /** Live data hook — fetches a JSON API route; exposes loading/error/reload. */
