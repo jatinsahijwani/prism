@@ -1,0 +1,104 @@
+{
+  "network": "testnet",
+  "rpcUrl": "https://soroban-testnet.stellar.org",
+  "explorer": "https://stellar.expert/explorer/testnet",
+  "readSourceAccount": "GBOHXV4AO7QHS4MMVERDLEVVMPSFE6S5E5SBWDFE3SVW3ZLTUBWMQNSA",
+  "contracts": {
+    "disclosure": "CBBUNBBZAQBQUNVCZTGD4KUJCRO5T6Z24P3H3IAUHHPL6CBNGRINCAHU",
+    "verifierRegistry": "CDT4FU2JVI2JWBKMBHVQSEYTG7L7DXXU2NRHVKDQFC2XFHRFMS6Z7PQ2",
+    "aggregatorK8": "CCTYJUKHHCYHI6MT4EQLCL7P5UQTSVZWT6NJAZ7TSLHIN6QYGYACA76C",
+    "nullifierRegistryK8": "CDXWKWSSAVXNU3R67T5VYSJDKQBWA6JTCFHMQBDSA52KCJ7PRQMP64UL",
+    "treeK8": "CAUMBMTTWILMQTYL2LY3QEWWAE6C7GBPHVU4BJT44M4U56XNLMBLE7X6",
+    "omnichainMirror": "CBWF6BC2JULCVNE3SLRAIVJWASCSQPIGQOF6BYRKTPUQSDEESAPWLSSI",
+    "aggregatorOmni": "CARP3XNCYQPRPETRJUKE7D5NLDXDNYTL2CK7RAMTI32NXS2YOULTPO6C",
+    "aspOmni": "CB323Y72DWJNAVBXWUDO7OMUK2ZW2PO2IUUGBDYUCEUN27VPHWIPSVUI"
+  },
+  "txs": {
+    "settleK8": "bfeec9d01ab59f93b6f67a27d9db42dc0ca2655a0027d74f56464d7a0abe80cf",
+    "settleFreshB": "2be458808641f8c56ac98ea53d7aa8adc01736828e0d03c3e37cdf4fa1ce6daa",
+    "evmSync": "ba047b1570e8688c8beffcf698e8a7346c21d65b631d908846ca772cf6b17d70",
+    "putNotes": [
+      "24e038a5d95b66aa38c2f2fa7a2115723e12c56a5a2a32c8364aaf83c7c3562b",
+      "597f1e608564d32510087ba1c1f998332d6b9c434c379a7a30432f86f68bbf1b",
+      "dd3e62636df37e3ee890031c0ebc5898e1540392e2d2c0d1a7ffe69fc173aa83"
+    ]
+  },
+  "disclosure": {
+    "auditorViewingKeyDemo": "2934562934857",
+    "expectedTotal": "9000000",
+    "capOk": "5000000",
+    "capFail": "4000000",
+    "notes": [
+      {
+        "commitment": "01db6803f2076a40ecc81a166dcdc064e8a56e1efb3a938ccd0ae6d07345fdaf",
+        "rx": "002d1f35173b04e750c1b91def62b5f65a3997b8dc10d5e26a5d4d29a5868651",
+        "ry": "2128fa2fa657bf48eb581f1e116016fe5da26ec679c407fb0b622a0072fa89a2",
+        "ciphertext": "24eeb8578238b122f24a6d5f18e03540c6dd0523b1182cc1cbca05caf5af30e1"
+      },
+      {
+        "commitment": "30201d4c1bddbf9b566be5843995aa200694e452cfaf2abf9e4b0464e2333d1f",
+        "rx": "2c138f9649ae8ea6edd0bda1de95645f0d51335511ba981980d464d07b216f9b",
+        "ry": "2964864a8c860834201803aecb42313bc36e5602b866cadfe6fc35baa341b878",
+        "ciphertext": "0d7dfc552cca2ac797f301a15c9949e52c5a779c7768036d3c9fc219862ff7ea"
+      },
+      {
+        "commitment": "23c1537bdb299112066760491e6cf8f2b23fff7c1df283ab4d62215b84e5f943",
+        "rx": "288df0c8c207ec0424b6d24bffad819e2922bee9914efb362fbb36040fcee321",
+        "ry": "128bb8a8fb282d872cbf0f030912a61df5c053337c685e2ce04e12d417858be2",
+        "ciphertext": "15f150c0f1215ec6bb809ecbd0943e48fae417f8366b8d1785ff234b85879513"
+      }
+    ]
+  },
+  "aggregation": {
+    "flatVerify": 26619054,
+    "settleK8Instructions": 42084162,
+    "ceiling": 100000000,
+    "rows": [
+      {
+        "k": 1,
+        "prism": 26619054,
+        "naive": 26619054
+      },
+      {
+        "k": 2,
+        "prism": 26619054,
+        "naive": 53238108
+      },
+      {
+        "k": 4,
+        "prism": 26619054,
+        "naive": 106476216
+      },
+      {
+        "k": 8,
+        "prism": 26619054,
+        "naive": 212952432
+      }
+    ],
+    "settledNullifier": "21ad5753bd36b1922c952f67378ea454e27ebde68c1c4eae835e5b5ebc388088",
+    "root": "02eda53576ae2deea8fa2fc4eeee468eab82b62b07a682a13bc78fb2aa467a0d"
+  },
+  "omnichain": {
+    "aspApprovedRoot": "076e5f4b2693a0433e99c4922241b27ed904aa9ee10902b108c91a466abb45c9",
+    "identityA": {
+      "nullifier": "20b268de0dbc53b09fcedacd253f83451950d99dc6dfc575581cbfe1c750c3d2",
+      "settleArgs": {
+        "proof": {
+          "a": "2c599fea959bbdf4742e7ef54542443805e3b7e7533165a0104cd00acde9f7071e2de497fc6693df090c295b89cc3fec287e17ce037b8498fcf2db3aeb09da5a",
+          "b": "0c70c6c981dd81718bb1d64b97931ddb4c4620ff71f0a051c6fa46d3cdfa736f0c76379f3b6a09095b4772d549a78a1e27665211cc7d938a1ae115f716724a9d07ffa7421ddee2bee21cd368ab7c324fb1ffea5a5faf0044252db3f9bacba3d010a848f97aecf8e5e1b5891f41ba407051c3ca4d29e16749e7c38112b240595e",
+          "c": "2e5f64d6cf064fd09f30b57356ecc50330bcc8216eadc3bab2134b4641805cec1e354172ef84c79c64ca08fc68368b3f0cc876eb3aa5b55b1dcbccdc9826d75a"
+        },
+        "root": "076e5f4b2693a0433e99c4922241b27ed904aa9ee10902b108c91a466abb45c9",
+        "externalNullifier": "000000000000000000000000000000000000000000000000000000000000002a",
+        "h": "12425ceca37554f348f6636a0e71505ac8bfc5540eb29cb37208569e9de2383d",
+        "aggregateOutput": "0000000000000000000000000000000000000000000000000000000000401640",
+        "nullifiers": [
+          "20b268de0dbc53b09fcedacd253f83451950d99dc6dfc575581cbfe1c750c3d2"
+        ]
+      }
+    },
+    "identityB": {
+      "nullifier": "04c0b2b1452a23200899da0f7bd5700f072d99ca3844679885fef19c81240fba"
+    }
+  }
+}

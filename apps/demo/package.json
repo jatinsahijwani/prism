@@ -4,8 +4,29 @@
   "private": true,
   "description": "Prism flagship demo — confidential, auditable RWA settlement on Stellar",
   "license": "Apache-2.0",
-  "type": "module",
   "scripts": {
-    "build": "echo \"(stub) demo build\""
+    "predev": "node scripts/build-demo-data.mjs",
+    "dev": "next dev",
+    "build": "node scripts/build-demo-data.mjs && next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@creit.tech/stellar-wallets-kit": "^1.7.5",
+    "@prism-stellar/sdk": "workspace:*",
+    "@stellar/stellar-sdk": "^13.1.0",
+    "circomlibjs": "^0.1.7",
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.0"
   }
 }

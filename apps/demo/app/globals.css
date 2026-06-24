@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: #050507;
+  color: #f4f5f7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The signature spectrum ray — a thin white→VIBGYOR gradient bar. */
+.spectrum-bar {
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #8b5cf6 22%,
+    #6366f1 36%,
+    #38bdf8 50%,
+    #34d399 64%,
+    #fbbf24 78%,
+    #fb923c 88%,
+    #f87171 100%
+  );
+}
+
+.spectrum-text {
+  background: linear-gradient(90deg, #fff, #38bdf8 45%, #34d399 70%, #fbbf24 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hairline {
+  border: 1px solid #1c1d26;
+}
+
+.glass {
+  background: rgba(14, 15, 21, 0.7);
+  backdrop-filter: blur(12px);
+}
+
+/* loading shimmer */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #14151c;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  animation: shimmer 1.5s infinite;
+}

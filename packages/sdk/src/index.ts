@@ -12,3 +12,21 @@ export {
   type EncryptedNote,
   type DisclosureResult,
 } from "./disclosure.ts";
+
+export {
+  prismRead,
+  prismSimulate,
+  simulateSettle,
+  getAuditor,
+  getNote,
+  isApprovedRoot,
+  isForeignSpent,
+  isSpent,
+  bytesScVal,
+  bytesVecScVal,
+  proofScVal,
+  TESTNET_RPC,
+  type SettleArgs,
+  type SimResult,
+  type ReadOpts,
+} from "./client.ts";
