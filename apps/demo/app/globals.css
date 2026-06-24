@@ -39,6 +39,10 @@ body {
   border: 1px solid #1c1d26;
 }
 
+.btn-ghost {
+  @apply rounded-full border border-hair px-5 py-3 text-sm font-medium text-white/80 transition hover:bg-white/5;
+}
+
 .glass {
   background: rgba(14, 15, 21, 0.7);
   backdrop-filter: blur(12px);
