@@ -2,40 +2,20 @@
 
 **The confidential-compliance layer for real-world assets on Stellar.**
 
-Prism is a composable ZK SDK for Soroban — an anonymous-membership + nullifier core
-(the "Semaphore Stellar doesn't have") plus three differentiators: a **proof-aggregation
-coprocessor** (N→1), **omnichain nullifiers** (EVM↔Stellar), and **standard-native
-selective disclosure** (SEP-57 / confidential-token).
-
 > One ray of light enters, a full spectrum comes out — one ZK primitive in, a spectrum
 > of problems solved out.
 
 Canonical proof system: **Groth16 over BN254**, verified on-chain with Soroban's native
-BN254 host functions (Protocol 25/26). Full design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+BN254 host functions (Protocol 25/26).
 
-## Repo layout
+---
 
-```
-contracts/   # Rust / Soroban — the heart
-  verifier-registry/   # Groth16/BN254 IVerifier + circuitId→VK   (active)
-  commitment-tree/     # incremental Merkle tree (Poseidon2)       (stub)
-  nullifier-registry/  # spent-nullifier set                       (stub)
-  aggregator/          # N→1 proof-aggregation coprocessor          (stub)
-  omnichain-mirror/    # EVM↔Stellar nullifier mirror               (stub)
-  disclosure/          # view keys + ASP, SEP-57 binding            (stub)
-circuits/    # Circom 2 — membership, nullifier, range, aggregation, disclosure
-packages/sdk/  # TypeScript SDK — client-side WASM proving
-services/    # off-chain aggregator + nullifier relayer
-apps/demo/   # RWA confidential-settlement flagship demo
-bench/       # instruction-count + XLM cost benchmarks (the "receipts")
-```
-
-## Benchmarks — receipts
+## Proof
 
 The load-bearing constraint is Soroban's **~100M instruction ceiling per contract call**.
-A single Groth16/BN254 verify measures **~28.8M instructions on testnet** (Protocol 26);
-naive N-verify blows past 100M at **N = 4**; the Aggregator's job is N→1 (one ~28.8M
-verify regardless of N).
+A single Groth16/BN254 verify measures **~28.8M instructions on testnet**; naive N-verify
+blows past 100M at **N = 4**. The Aggregator's whole job is N→1: **one ~28.8M verify
+regardless of N.**
 
 **Aggregator — one verify settles K memberships, flat in K.** Because the aggregation
 circuit exposes a *constant* 3 public signals `[H, root, externalNullifier]` regardless of
@@ -53,12 +33,60 @@ Single Groth16/BN254 verify also measured on testnet via RPC `simulateTransactio
 (decoded `SorobanTransactionData.resources.instructions`) at **28,822,880** instructions,
 ~38,819 stroops (~0.0039 XLM).
 
-_Native `cargo test` CPU counts (above) underestimate WASM; testnet simulation is the
+_Native `cargo test` CPU counts (the K-table) underestimate WASM; testnet simulation is the
 authoritative figure. The K-table is from the `verify_cost_is_flat_in_k` bench — spread
 across K is **zero**. **Aggregation-by-batching; recursive folding (Nova/ProtoStar) is
-deferred to SCF.**_
+deferred to SCF.**_ Full methodology: [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md).
 
-## Deployment (Stellar testnet, Protocol 26)
+### Deployed on testnet — receipts
+
+Everything below is live on Stellar testnet (Protocol 26). Full list, grouped by milestone:
+[`docs/RECEIPTS.md`](docs/RECEIPTS.md).
+
+| Contract | Address (explorer) |
+|---|---|
+| aggregator | [`CCTYJUKH…YACA76C`](https://stellar.expert/explorer/testnet/contract/CCTYJUKHHCYHI6MT4EQLCL7P5UQTSVZWT6NJAZ7TSLHIN6QYGYACA76C) |
+| verifier-registry | [`CDT4FU2J…S6Z7PQ2`](https://stellar.expert/explorer/testnet/contract/CDT4FU2JVI2JWBKMBHVQSEYTG7L7DXXU2NRHVKDQFC2XFHRFMS6Z7PQ2) |
+| commitment-tree | [`CAUMBMTT…BLE7X6`](https://stellar.expert/explorer/testnet/contract/CAUMBMTTWILMQTYL2LY3QEWWAE6C7GBPHVU4BJT44M4U56XNLMBLE7X6) |
+| nullifier-registry | [`CDXWKWSS…MP64UL`](https://stellar.expert/explorer/testnet/contract/CDXWKWSSAVXNU3R67T5VYSJDKQBWA6JTCFHMQBDSA52KCJ7PRQMP64UL) |
+
+| Milestone tx | Result | Explorer |
+|---|---|---|
+| Aggregator K=8 settle | `8` memberships settled in one verify | [`bfeec9d0…`](https://stellar.expert/explorer/testnet/tx/bfeec9d01ab59f93b6f67a27d9db42dc0ca2655a0027d74f56464d7a0abe80cf) |
+| Omnichain — settle fresh identity B | `Settled count: 1` | [`2be45880…`](https://stellar.expert/explorer/testnet/tx/2be458808641f8c56ac98ea53d7aa8adc01736828e0d03c3e37cdf4fa1ce6daa) |
+| Omnichain — relayer sync EVM-spent nullifier | mirror updated | [`ba047b15…`](https://stellar.expert/explorer/testnet/tx/ba047b1570e8688c8beffcf698e8a7346c21d65b631d908846ca772cf6b17d70) |
+| Disclosure — `put_note` (proof verified on-chain) | note stored, no amounts | [`24e038a5…`](https://stellar.expert/explorer/testnet/tx/24e038a5562b) |
+| Day-1 single verify | `< 100M` (28.8M) | [`ae7324c2…`](https://stellar.expert/explorer/testnet/tx/ae7324c2ac6fac) |
+
+---
+
+## What is Prism
+
+A composable ZK SDK for Soroban — an anonymous-membership + nullifier core
+(the "Semaphore Stellar doesn't have") plus three differentiators: a **proof-aggregation
+coprocessor** (N→1), **omnichain nullifiers** (EVM↔Stellar), and **standard-native
+selective disclosure** (SEP-57 / confidential-token).
+
+Full design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). Documentation index: [`docs/`](docs/README.md).
+
+## Repo layout
+
+```
+contracts/   # Rust / Soroban — the heart (all six deployed on testnet; see "Real vs. mocked")
+  verifier-registry/   # Groth16/BN254 IVerifier + circuitId→VK
+  commitment-tree/     # incremental Merkle tree (Poseidon2)
+  nullifier-registry/  # spent-nullifier set, atomic check_and_insert
+  aggregator/          # N→1 proof-aggregation coprocessor
+  omnichain-mirror/    # EVM↔Stellar nullifier mirror (attestation mode)
+  disclosure/          # view keys + ASP, SEP-57 binding
+circuits/    # Circom 2 — membership, nullifier, range, aggregation, disclosure
+packages/sdk/  # TypeScript SDK — read/simulate layer + selective disclosure (see docs/SDK.md)
+services/    # off-chain aggregator + nullifier relayer
+apps/demo/   # RWA confidential-settlement flagship demo
+bench/       # instruction-count + XLM cost benchmarks (the "receipts")
+```
+
+## Milestone receipts (detail)
 
 The **Aggregator milestone** — one on-chain Groth16/BN254 verify settled **K=8** memberships
 in a single transaction (`Settled count: 8`):
@@ -120,7 +148,8 @@ Reproduce: `circuits/` → `pnpm install && bash scripts/aggregate_build.sh && b
 ## Selective disclosure → SEP-57 / confidential-token mapping
 
 Prism is the **ZK confidential+disclosure module a regulated-asset issuer plugs in** — not a
-generic view key. Mapping to the SEP-57 / ERC-7984-style confidential-token interface:
+generic view key. Mapping to the SEP-57 / ERC-7984-style confidential-token interface (expanded
+in [`docs/SEP57-MAPPING.md`](docs/SEP57-MAPPING.md)):
 
 - **Issuer onboarding** = register the auditor/regulator's **viewing key** (`disclosure.register_auditor`) and admit participants via the **ASP** (`asp.set_allowed`, then `asp.approve_root`).
 - **Confidential settlement** = the Aggregator settles K transfers under one proof; `settle()` enforces `asp.is_approved_root` (compliance gate) — amounts never hit the chain.
@@ -146,12 +175,12 @@ proofs and full SEP-57 wire-format binding are SCF items.
 | SDK selective disclosure (`encryptNote`, `prism.disclose`) | **REAL** — Baby Jubjub ECDH + Poseidon; auditor demo runs |
 | omnichain-mirror + settle foreign-spent gate | **REAL** — deployed; EVM-spent identity blocked on testnet |
 | relayer: Stellar posting | **REAL** (stellar-cli) — EVM source is a labeled **MOCK** |
-| demo dapp (UI) | not started |
+| demo dapp (UI) | **REAL** — `apps/demo`: Next.js wizard over live testnet |
 
 _Updated as milestones land. Honesty over polish — mocks are labeled. Tree/nullifier/ASP
 mutations are permissionless this milestone (operator-gating is a hardening TODO). Auditor
 decryption + predicate checks are off-chain (view-key model); counterparty/memo not yet
-bound in-circuit._
+bound in-circuit. Security posture: [`docs/SECURITY.md`](docs/SECURITY.md)._
 
 ## Status
 
@@ -164,3 +193,5 @@ bound in-circuit._
 - [x] Omnichain mirror (attestation; EVM-spent identity blocked on testnet, fresh settles)
 - [x] Demo dapp (UI) — `apps/demo`: Next.js guided wizard over live testnet
 - [ ] Demo video
+
+Roadmap to mainnet: [`docs/ROADMAP.md`](docs/ROADMAP.md).
