@@ -162,5 +162,5 @@ bound in-circuit._
 - [x] Disclosure (viewing key + ASP + on-chain correctness proof; deployed on testnet)
 - [x] SDK selective disclosure (`encryptNote` + `prism.disclose`) + auditor demo
 - [x] Omnichain mirror (attestation; EVM-spent identity blocked on testnet, fresh settles)
-- [ ] Demo dapp (UI)
+- [x] Demo dapp (UI) — `apps/demo`: Next.js guided wizard over live testnet
 - [ ] Demo video
